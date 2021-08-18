@@ -1,0 +1,90 @@
+1.)
+CREATE TABLE deposit(
+	Act_no VARCHAR(10) PRIMARY KEY,
+	C_name VARCHAR(10),
+	B_name VARCHAR(10),
+	amount DECIMAL(8,2) NOT NULL
+);
+
+INSERT INTO Deposit VALUES
+    	('J4845', 'SUNIL','XYZ',81124.41),
+    	('M4745', 'MOBAK','PQR',741854.41),
+    	('K4563', 'ADA','XYZ',912312.44),
+    	('K4583', 'RAM','ABC',914512.44),
+    	('K2643', 'FAISAL','PQR',264512.44),
+    	('D2543', 'AMAR','PQR',24512.44),
+    	('D8943', 'SARTAJ','XYZ',115632.66),
+    	('I8729', 'IMRAN','PQR',368713.78),
+	('A4583', 'ANIL','ABC',14512.44);
+
+CREATE VIEW depositView AS
+SELECT Act_no,C_name,B_name,
+FROM deposit;
+
+INSERT INTO depositView VALUES ('Z7891','SHANX','PQR');
+output- Shows error as amount attribute should be not null and it doesn't have a default value.
+
+DELETE FROM depositView
+WHERE Act_no ='k4583';
+output:- Row Delete from View			Row deleted from table
+	| K4583  | RAM    | ABC    |		| K4583  | RAM    | ABC    | 914512.44 |
+
+UPDATE depositVIew
+SET C_name='SHANX'
+WHERE Act_no='I8729';
+output:- Initial Row in View 			Initial Row in table
+	| I8729  | IMRAN  | PQR    |		| I8729  | IMRAN  | PQR    | 368713.78 |
+	 Updated Row in View			Updated Row in table
+	| I8729  | SHANX  | PQR    |		| I8729  | SHANX  | PQR    | 368713.78 |
+
+2.)
+CREATE TABLE Branch(
+    	B_name VARCHAR(10) PRIMARY KEY,
+	City VARCHAR(10) CHECK (City IN ('Delhi','Kolkata','Mumbai'))
+);
+
+CREATE TABLE deposit(
+    	Act_no VARCHAR(10) PRIMARY KEY,
+    	C_name VARCHAR(10),
+    	B_name VARCHAR(10),
+    	amount DECIMAL(8,2) NOT NULL,
+    	FOREIGN KEY (B_name)
+    		REFERENCES Branch(B_name)
+    		ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+INSERT INTO Branch VALUES 
+   	('ABC','Mumbai'),
+    	('PQR','Delhi'),
+    	('XYZ','Kolkata');
+
+INSERT INTO Deposit VALUES
+    	('J4845', 'SUNIL','XYZ',81124.41),
+    	('M4745', 'MOBAK','PQR',741854.41),
+    	('K4563', 'ADA','XYZ',912312.44),
+    	('K4583', 'RAM','ABC',914512.44),
+    	('K2643', 'FAISAL','PQR',264512.44),
+    	('D2543', 'AMAR','PQR',24512.44),
+    	('D8943', 'SARTAJ','XYZ',115632.66),
+    	('I8729', 'IMRAN','PQR',368713.78),
+	('A4583', 'ANIL','ABC',14512.44);
+
+CREATE VIEW depositView AS
+	SELECT *FROM deposit
+	INNER JOIN Branch USING(B_name);
+
+INSERT INTO depositView(Act_no,C_name,B_name,amount,city)
+VALUES('Z7861','SHANX','ABC',33125.67,'Mumbai');
+output:- error as we cannot modify more than one base table through a join view
+
+DELETE FROM depositView 
+WHERE C_name='RAM';
+output:- error as we cannot delete from join view
+
+UPDATE depositView
+SET C_name='SHANX'
+WHERE C_name='RAM';
+output:- Initial Row in View 		 	Initial Row in deposit table
+	 |ABC|K4583|RAM|914512.44|Mumbai|	| K4583  | RAM    | ABC    | 914512.44 |
+	 Updated Row in VIew 			Updated Row in deposit table
+	 |ABC|K4583|SHANX|914512.44|Mumbai|	| K4583  | SHANX  | ABC    | 914512.44 |

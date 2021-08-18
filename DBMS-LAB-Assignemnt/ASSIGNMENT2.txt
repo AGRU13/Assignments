@@ -1,0 +1,489 @@
+
+CREATE TABLE Branch(
+    	B_name VARCHAR(10) PRIMARY KEY,
+	City VARCHAR(10) CHECK (City IN ('Delhi','Kolkata','Mumbai'))
+);
+
+CREATE TABLE Customer(
+    	C_name VARCHAR(10) PRIMARY KEY CHECK (BINARY C_name=BINARY UPPER(C_name)),
+    	City VARCHAR(10) NOT NULL 
+);
+
+CREATE TABLE deposit(
+    	Act_no VARCHAR(10) PRIMARY KEY,
+    	C_name VARCHAR(10),
+    	B_name VARCHAR(10),
+    	amount DECIMAL(8,2) NOT NULL,
+    	FOREIGN KEY (C_name)
+    		REFERENCES Customer(C_name)
+    		ON DELETE CASCADE ON UPDATE CASCADE,
+    	FOREIGN KEY (B_name)
+    		REFERENCES Branch(B_name)
+    		ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE Borrow(
+	Loan_No VARCHAR(10) PRIMARY KEY CHECK(BINARY Loan_No=BINARY UPPER(Loan_No)),
+    	C_name VARCHAR(10),
+    	B_Name VARCHAR(10),
+    	amount DECIMAL(8,2) CHECK(amount>1000),
+    	FOREIGN KEY (C_name)
+    		REFERENCES Customer(C_name),
+    	FOREIGN KEY (B_name)
+    		REFERENCES Branch(B_name)
+);
+
+INSERT INTO Customer VALUES
+	('RAM','Delhi'),
+    	('AMAR','Indore'),
+    	('SUNIL','Nagpur'),
+    	('Mobak','Agra'),
+    	('ADA','Delhi'),
+    	('FAISAL','Wasseypur'),
+    	('SARTAJ','Mumbai'),
+	('IMRAN','Delhi'),
+	('ANIL','Kolkata');
+
+INSERT INTO Branch VALUES 
+   	('ABC','Mumbai'),
+    	('PQR','Delhi'),
+    	('XYZ','Kolkata');
+
+INSERT INTO Deposit VALUES
+    	('J4845', 'SUNIL','XYZ',81124.41),
+    	('M4745', 'MOBAK','PQR',741854.41),
+    	('K4563', 'ADA','XYZ',912312.44),
+    	('K4583', 'RAM','ABC',914512.44),
+    	('K2643', 'FAISAL','PQR',264512.44),
+    	('D2543', 'AMAR','PQR',24512.44),
+    	('D8943', 'SARTAJ','XYZ',115632.66),
+    	('I8729', 'IMRAN','PQR',368713.78),
+	('A4583', 'ANIL','ABC',14512.44);
+
+INSERT INTO Borrow VALUES
+    	('L6454', 'SUNIL','XYZ',1001.01),
+    	('L1235', 'RAM','ABC',485211.50),
+    	('L1547', 'ADA','ABC',256410.50),
+    	('L1489', 'AMAR','PQR',40080.50),
+    	('L8854', 'FAISAL','XYZ',5000.50),
+    	('L3626', 'SARTAJ','PQR',86733.95),
+    	('L6387', 'IMRAN','PQR',316786.00),
+	('L4583', 'ANIL','XYZ',84512.44);
+
+1)Give the name of the customers having living city Nagpur and branch city Kolkata.
+1)  SELECT C_Name
+    FROM Customer
+    INNER JOIN deposit USING (C_Name)
+    INNER JOIN Branch USING (B_Name)
+    WHERE Customer.City='Nagpur' AND Branch.City='Kolkata'
+    UNION
+    SELECT C_Name
+    FROM Customer
+    INNER JOIN Borrow USING (C_Name)
+    INNER JOIN branch USING (B_Name)
+    WHERE Customer.City='Nagpur' AND Branch.City='Kolkata';
+
+Output: +--------+
+	| C_Name |
+	+--------+
+	| SUNIL  |
+	+--------+
+
+2)Give the name of the customers having the same living city as their branch city Kolkata.
+2) SELECT C_Name
+    FROM Customer
+    INNER JOIN deposit USING (C_Name)
+    INNER JOIN branch USING (B_Name)
+    WHERE Customer.City='Kolkata' AND Branch.City='Kolkata'
+    UNION
+    SELECT C_Name
+    FROM Customer
+    INNER JOIN Borrow USING (C_Name)
+    INNER JOIN branch USING (B_Name)
+    WHERE Customer.City='Kolkata' AND Branch.City='Kolkata';
+
+Output: +--------+
+	| C_Name |
+	+--------+
+	| ANIL   |
+	+--------+
+
+3)Give the name of the customers who are depositors and have same branch city as that of Sunil.
+3)  SELECT C_name
+    FROM deposit
+    INNER JOIN branch USING(B_name)
+    WHERE City IN(
+    	SELECT City FROM deposit INNER JOIN branch USING(B_name) WHERE C_name='SUNIL'
+    	UNION
+    	SELECT City FROM borrow INNER JOIN branch USING(B_name) WHERE C_name='SUNIL'
+    );
+
+Output: +--------+
+	| C_name |
+	+--------+
+	| SARTAJ |
+	| SUNIL  |
+	| ADA    |
+	+--------+
+
+4)Give the deposit details and loan details of customers in the city where Ram is living.
+4) SELECT ACT_no,C_name,B_name,amount, 'Depsoit' AS Type
+   FROM deposit
+   INNER JOIN Branch USING (B_name)
+   WHERE branch.City=(SELECT City FROM Customer WHERE C_Name='Ram')
+   UNION
+   SELECT Loan_no,C_name,B_name,amount, 'Borrow' AS Type
+   FROM borrow
+   INNER JOIN branch USING (B_name)
+   WHERE branch.city=(SELECT City FROM Customer WHERE C_name='Ram');
+
+Output: +--------+--------+--------+-----------+---------+
+	| ACT_no | C_name | B_name | amount    | Type    |
+	+--------+--------+--------+-----------+---------+
+	| D2543  | AMAR   | PQR    |  24512.44 | Depsoit |
+	| I8729  | IMRAN  | PQR    | 368713.78 | Depsoit |
+	| K2643  | FAISAL | PQR    | 264512.44 | Depsoit |
+	| M4745  | MOBAK  | PQR    | 741854.41 | Depsoit |
+	| L1489  | AMAR   | PQR    |  40080.50 | Borrow  |
+	| L3626  | SARTAJ | PQR    |  86733.95 | Borrow  |
+	| L6387  | IMRAN  | PQR    | 316786.00 | Borrow  |
+	+--------+--------+--------+-----------+---------+
+
+5)List the no. of customers who are depositors as well as borrowers.
+5) SELECT COUNT(C_Name)
+   FROM Customer
+   INNER JOIN deposit USING (C_name)
+   INNER JOIN borrow USING (C_name);
+
+Output: +---------------+
+	| COUNT(C_Name) |
+	+---------------+
+	|             8 |
+	+---------------+
+
+6)Give the name of borrowers whose loan amount is greater than the loan amount of Amar
+6) SELECT C_Name
+   FROM Borrow
+   WHERE amount>(SELECT amount FROM Borrow WHERE C_Name='Amar');
+
+Output: +--------+
+	| C_Name |
+	+--------+
+	| RAM    |
+	| ADA    |
+	| SARTAJ |
+	| ANIL   |
+	| IMRAN  |
+	+--------+
+
+7) Give the name of depositors having the same branch city as that of Sunil and having the same city as that of Anil
+7)  SELECT C_Name
+    FROM deposit
+    INNER JOIN Customer USING (C_name)
+    INNER JOIN Branch USING (B_name)
+    WHERE Customer.City=(SELECT City FROM Customer WHERE C_name='IMRAN')
+    	AND Branch.City IN (SELECT City FROM deposit INNER JOIN branch USING (B_name) WHERE C_Name='SUNIL'
+    		UNION SELECT City FROM borrow INNER JOIN branch USING (B_name) WHERE C_Name='SUNIL');
+
+Output: +--------+
+	| C_Name |
+	+--------+
+	| ADA    |
+	+--------+
+
+8) List all the depositors living in city kolkata & having branch city Mumbai .
+8) SELECT C_name
+   FROM deposit
+   INNER JOIN Customer USING (C_name)
+   INNER JOIN Branch USING (B_name)
+   WHERE Customer.City='Kolkata' AND Branch.City='Mumbai';
+
+Output: +--------+
+	| C_name |
+	+--------+
+	| ANIL   |
+	+--------+
+
+9) List all the Customers who are both depositors & borrowers & living in the same city as RAM .
+9)  SELECT DISTINCT C_name
+    FROM Customer
+    INNER JOIN deposit USING (C_name)
+    INNER JOIN borrow USING (C_name)
+    WHERE city=(SELECT city FROM Customer WHERE C_name='RAM');
+
+Output: +--------+
+	| C_name |
+	+--------+
+	| ADA    |
+	| IMRAN  |
+	| RAM    |
+	+--------+
+
+10) List the customers who are borrowers or depositors & having living city kolkata & branch city same as that of Sunil .
+10) SELECT C_name
+    FROM (SELECT *FROM deposit UNION SELECT *FROM borrow) temp
+    INNER JOIN Customer USING(C_name)
+    INNER JOIN Branch USING (B_name)
+    WHERE Customer.City='Kolkata' AND Branch.City IN (
+    SELECT City FROM deposit INNER JOIN branch USING(B_name) WHERE C_name='SUNIL'
+         UNION
+         SELECT City FROM borrow INNER JOIN branch USING(B_name) WHERE C_name='SUNIL'
+    );
+
+Output: +--------+
+	| C_name |
+	+--------+
+	| ANIL   |
+	+--------+
+
+11) List all cities where branches of Anil and Sunil are located
+11) SELECT City
+    FROM deposit
+    INNER JOIN branch USING (B_name)
+    WHERE C_name IN ('ANIL','SUNIL')
+    UNION
+    SELECT City
+    FROM borrow
+    INNER JOIN branch USING (B_name)
+    WHERE C_name IN ('ANIL','SUNIL');
+
+Output: +---------+
+	| City    |
+	+---------+	
+	| Mumbai  |
+	| Kolkata |
+	+---------+
+
+12) List the name of the branch having highest no of depositors.
+12) SELECT COUNT(*) AS Number,B_name
+    FROM (SELECT *FROM deposit UNION SELECT *FROM borrow) ts
+    GROUP BY B_name
+    ORDER BY Number DESC
+    LIMIT 1;
+
+Output: +--------+--------+
+	| Number | B_name |
+	+--------+--------+
+	|      7 | PQR    |
+	+--------+--------+
+
+13) List the name of customers having maximum deposit
+13) SELECT deposit.C_name
+    FROM deposit
+    LEFT JOIN deposit deposit2 ON deposit2.amount>deposit.amount
+    WHERE deposit2.amount IS NULL;
+
+Output: +--------+
+	| C_name |
+	+--------+
+	| RAM    |
+	+--------+
+
+14) List all the customers, along with their amount, who are either borrowers or depositors and living city is Delhi
+14) SELECT C_name, amount
+    FROM deposit
+    INNER JOIN Customer USING(C_name)
+    WHERE City='Delhi'
+    UNION
+    SELECT C_name,amount
+    FROM borrow
+    INNER JOIN Customer USING(C_name)
+    WHERE City='Delhi';
+
+Output: +--------+-----------+
+	| C_name | amount    |
+	+--------+-----------+
+	| ADA    | 912312.44 |
+	| IMRAN  | 368713.78 |
+	| RAM    | 914512.44 |
+	| ADA    | 256410.50 |
+	| IMRAN  | 316786.00 |
+	| RAM    | 485211.50 |
+	+--------+-----------+
+
+15) List all the depositors having deposit in all the branches where Sunil is having account.
+15) SELECT C_name
+    FROM deposit
+    WHERE B_name IN (
+    	SELECT B_name FROM deposit WHERE C_name='SUNIL'
+    	UNION
+    	SELECT B_Name FROM borrow WHERE C_name ='SUNIL');
+
+Output: +--------+
+	| C_name |
+	+--------+	
+	| SARTAJ |
+	| SUNIL  |
+	| ADA    |
+	+--------+
+
+16) List total deposit of the customers living in the city where Sunil is living.
+16) SELECT SUM(amount) AS Total_Deposit
+    FROM deposit
+    INNER JOIN Customer USING (C_name)
+    WHERE City=(SELECT City FROM Customer WHERE C_name='SUNIL');
+
+Output: +---------------+
+	| Total_Deposit |
+	+---------------+
+	|      81124.41 |
+	+---------------+
+
+17)List the name of the customers in ‘ABC’ branch having more deposit than any other customer in same branch.
+17) SELECT C_name
+    FROM deposit
+    WHERE B_name='ABC' AND amount=(SELECT MAX(amount) FROM deposit WHERE B_name='ABC');
+
+Output: +--------+
+	| C_name |
+	+--------+
+	| RAM    |
+	+--------+
+
+18) List the name of the customers having highest deposit in the city where branch of Sunil is located.
+18) WITH cte(C_name,amount) AS (
+    SELECT C_name,amount
+    FROM deposit
+    INNER JOIN branch USING(B_name)
+    WHERE City IN(
+    SELECT City FROM deposit INNER JOIN branch USING(B_name) WHERE C_name='SUNIL'
+             UNION
+             SELECT City FROM borrow INNER JOIN branch USING(B_name) WHERE C_name='SUNIL'
+     ))
+     SELECT cte.C_name
+     FROM cte
+     LEFT JOIN cte cte2 ON cte2.amount>cte.amount
+     WHERE cte2.amount IS NULL;
+
+Output: +--------+
+	| C_name |
+	+--------+
+	| ADA    |
+	+--------+
+
+19) List the name of the depositors having maximum deposit among depositors of Delhi for the branch ‘ABC’.
+19) WITH cte(C_name,amount) AS(
+    SELECT C_name,amount
+    FROM deposit
+    INNER JOIN Customer USING(C_name)
+    WHERE B_name='ABC' AND City='Delhi'
+    )
+    SELECT cte.C_name
+    FROM cte
+    LEFT JOIN cte cte2 ON cte2.amount>cte.amount
+    WHERE cte2.amount IS NULL;
+
+Output: +--------+
+	| C_name |
+	+--------+
+	| RAM    |
+	+--------+
+
+20) Give the name of the branches having the no. of depositors more than the no. of borrowers.
+20) SELECT table1.B_name
+    FROM (SELECT B_name,COUNT(*) AS deposit_num FROM deposit GROUP BY B_name) table1,
+    (SELECT B_name,COUNT(*) AS borrow_num FROM borrow GROUP BY B_name) table2
+    WHERE table1.B_name=table2.B_name AND table1.deposit_num>table2.borrow_num;
+
+Output: +--------+
+	| B_name |
+	+--------+
+	| PQR    |
+	+--------+
+
+21) give the names of the borrowers having the same branch city as highest borrower.
+21) SELECT C_name
+    FROM borrow
+    INNER JOIN branch USING(B_name)
+    WHERE City IN(
+    SELECT City
+    FROM borrow
+    INNER JOIN branch USING(B_name)
+    LEFT JOIN borrow borrow2 ON borrow2.amount>borrow.amount
+    WHERE borrow2.amount IS NULL);
+
+Output: +--------+
+	| C_name |
+	+--------+
+	| RAM    |
+	| ADA    |
+	+--------+
+
+22) Give 10% interest to all depositors living in Indore and branch city in Delhi.
+22) UPDATE deposit
+    SET amount=1.1*amount
+    WHERE B_name=(SELECT B_name FROM branch WHERE city='Delhi') AND
+    C_name IN (SELECT C_name from Customer WHERE city='Indore');
+
+output:- Initial 						Final
+	 | D2543  | AMAR   | PQR    |  26963.68 | 		| D2543  | AMAR   | PQR    |  29660.05 |
+
+23) Assign to the deposit of Anil the maximum deposit from ‘ABC’ branch.
+23) UPDATE deposit
+    SET amount=(SELECT * FROM (SELECT MAX(amount) FROM deposit WHERE B_name='ABC') as t)
+    WHERE C_name='ANIL';
+
+Ouput:- Initial							Final
+	| A4583  | ANIL   | ABC    |  14512.44 |		| A4583  | ANIL   | ABC    | 914512.44 |
+	
+24) Transfer Rs. 1000 from the account of Anil to the account of Ram if both are having same branch.
+24)a)  UPDATE deposit
+       SET amount=amount+1000
+       WHERE C_name='RAM' AND B_name=(SELECT *FROM (SELECT B_name FROM deposit WHERE C_name='ANIL' ) AS temp1) AND 
+       EXISTS (SELECT *FROM (SELECT *FROM deposit WHERE C_name='ANIL' AND amount>=1000) AS temp2);
+   b)  UPDATE deposit
+       SET amount=amount-1000
+       WHERE C_name='ANIL' AND B_name=(SELECT *FROM (SELECT B_name FROM deposit WHERE C_name='RAM' ) AS temp1) AND 
+       EXISTS (SELECT *FROM (SELECT *FROM deposit WHERE C_name='ANIL' AND amount>=1000) AS temp2);
+
+Output:- Initial						Final
+	 | A4583  | ANIL   | ABC    |  14512.44 |		| A4583  | ANIL   | ABC    |  13512.44 |
+	 | K4583  | RAM    | ABC    | 914512.44 |		| K4583  | RAM    | ABC    | 915512.44 |
+
+25) Add Rs.1000 to the account of those depositors who are having highest deposit amount in their respective branches.
+25) UPDATE deposit
+    SET amount=amount+1000
+    WHERE (amount,B_name) IN ( SELECT * FROM(SELECT MAX(amount),B_name FROM deposit GROUP BY B_name) AS t);
+
+Output:- Initial						Final
+	 | K4563  | ADA    | XYZ    | 912312.44 |		| K4563  | ADA    | XYZ    | 913312.44 |
+	 | K4583  | RAM    | ABC    | 914512.44 |		| K4583  | RAM    | ABC    | 915512.44 |
+	 | M4745  | MOBAK  | PQR    | 741854.41 |	 	| M4745  | MOBAK  | PQR    | 742854.41 |
+
+26) Add Rs.1000 to the amount of all depositors having deposit equal to or higher than the average deposit of their branches.
+26)  UPDATE deposit
+     SET amount=amount+1000
+     WHERE Act_no IN (SELECT * FROM(
+     	SELECT Act_no
+     	FROM deposit ,(SELECT AVG(amount) AS avg,B_name FROM deposit GROUP BY B_name) AS t
+     	WHERE t.B_name=deposit.B_name AND deposit.amount>=t.avg) AS temp);
+
+Output:- Initial						Final
+	 | I8729  | IMRAN  | PQR    | 368713.78 |		| I8729  | IMRAN  | PQR    | 369713.78 |
+	 | K4563  | ADA    | XYZ    | 912312.44 |		| K4563  | ADA    | XYZ    | 913312.44 |
+	 | K4583  | RAM    | ABC    | 914512.44 |		| K4583  | RAM    | ABC    | 915512.44 |
+	 | M4745  | MOBAK  | PQR    | 741854.41 |		| M4745  | MOBAK  | PQR    | 742854.41 |
+
+27) Delete borrower of branches having average loan less than 1000.
+27) DELETE FROM borrow 
+    WHERE B_name IN (SELECT * FROM (SELECT B_name FROM borrow GROUP BY B_name HAVING AVG(amount)<50000)AS t);
+
+Deleted rows:-  | L4583   | ANIL   | XYZ    |  84512.44 |
+		| L6454   | SUNIL  | XYZ    |   1001.01 |
+		| L8854   | FAISAL | XYZ    |   5000.50 |
+
+28) Delete the borrower of branches having minimum number of customers.
+28) DELETE FROM borrow
+    WHERE B_name IN (SELECT *FROM(
+    	SELECT B_name FROM borrow GROUP BY B_name HAVING COUNT(*) <=ALL(SELECT COUNT(*) FROM borrow GROUP BY B_name))
+	AS temp);
+
+Deleted rows:-  | L1235   | RAM    | ABC    | 485211.50 |
+		| L1547   | ADA    | ABC    | 256410.50 |
+
+29) Delete the deposit of Imran and Ram if both are having same living city.
+29)  DELETE FROM deposit
+     WHERE C_name IN ('IMRAN','RAM') AND (SELECT city FROM Customer WHERE C_name='RAM')=(SELECT city FROM Customer WHERE C_name='IMRAN');
+
+Deleted rows:-  | I8729  | IMRAN  | PQR    | 368713.78 |
+		| K4583  | RAM    | ABC    | 914512.44 |

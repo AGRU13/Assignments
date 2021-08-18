@@ -1,0 +1,295 @@
+1)
+DELIMITER //
+CREATE PROCEDURE IsLeapYear(IN year INT)
+BEGIN
+	IF (MOD(year,4)=0 AND MOD(year,100)!=0 OR MOD(year,400)=0) THEN
+		SELECT CONCAT(year," Is a Leap Year.") AS ' ';
+	ELSE SELECT CONCAT(year," Is not a Leap Year.") AS ' ';
+	END IF;
+END //
+DELIMITER ;
+
+output-	CALL IsLeapYear(2020);
+
+	+----------------------+
+	|                      |
+	+----------------------+
+	| 2020 Is a Leap Year. |
+	+----------------------+
+
+2)
+DELIMITER //
+CREATE PROCEDURE IsPalindrome(IN num INT)
+BEGIN
+	DECLARE temp INT ;
+	DECLARE revNum INT DEFAULT 0;
+    	SET temp=num;
+	WHILE num>0 DO
+        	SET revNum = revNum*10+MOD(num,10);
+		SET num=num DIV 10;
+    	END WHILE;
+    	IF temp=revNum THEN
+		SELECT CONCAT(temp," Is a palindrome number") AS "";
+	ELSE SELECT CONCAT(temp," Is not a plaindrome number") AS "";
+	END IF;
+END //
+DELIMITER ;
+
+output- CALL IsPalindrome(20002);
+	+------------------------------+
+	|                              |
+	+------------------------------+
+	| 20002 Is a palindrome number |
+	+------------------------------+
+
+3)
+DELIMITER //
+CREATE PROCEDURE IsArmstrong(IN num INT)
+BEGIN
+	DECLARE temp INT;
+	DECLARE cubeSum INT DEFAULT 0;
+    	DECLARE rem INT;
+    	SET temp=num;
+    	WHILE num>0 DO
+        	SET rem=MOD(num,10);
+		SET cubeSum=cubeSum+rem*rem*rem;
+        	SET num=num DIV 10;
+	END WHILE;
+    	IF temp=cubeSum THEN
+		SELECT CONCAT(temp," Is an Armstrong number") AS "";
+	ELSE SELECT CONCAT(temp," Is not an Armstrong number") AS "";
+	END IF;
+END //
+DELIMITER ;
+
+output- CALL IsArmstrong(153);
+	+----------------------------+
+	|                            |
+	+----------------------------+
+	| 153 Is an Armstrong number |
+	+----------------------------+
+
+4)
+DELIMITER //
+CREATE PROCEDURE FindGcd(IN numa INT,IN numb INT,IN numc INT)
+BEGIN
+	DECLARE a,b,c INT ;
+        SET a=numa;
+        SET b=numb;
+        WHILE b>0 DO
+		SET a=MOD(a,b);
+		SET c=b;
+            	SET b=a;
+		SET a=c;
+        END WHILE;
+        SET b=numc;
+        WHILE b>0 DO
+		SET a=MOD(a,b);
+            	SET c=b;
+            	SET b=a;
+            	SET a=c;
+        END WHILE;
+        SELECT CONCAT("GCD of ",numa," , ",numb," and ",numc," is = ",a) AS "";
+END //
+DELIMITER ;
+
+output- CALL FindGcd(100,25,1000);
+	+----------------------------------+
+	|                                  |
+	+----------------------------------+
+	| GCD of 100 , 25 and 1000 is = 25 |
+	+----------------------------------+
+
+5)
+DELIMITER //
+CREATE PROCEDURE FindLcm(IN numa INT,IN numb INT,IN numc INT)
+BEGIN
+	DECLARE a,b,c,temp INT ;
+        SET a=numa;
+        SET b=numb;
+        WHILE b>0 DO
+		SET a=MOD(a,b);
+		SET c=b;
+            	SET b=a;
+		SET a=c;
+        END WHILE;
+        SET a=numa*numb DIV a;
+        SET b=numc;
+        SET temp=a;
+        WHILE b>0 DO
+		SET a=MOD(a,b);
+            	SET c=b;
+            	SET b=a;
+            	SET a=c;
+        END WHILE;
+        SET a=temp*numc DIV a;
+        SELECT CONCAT("LCM of ",numa," , ",numb," and ",numc," is = ",a) AS "";
+END //
+DELIMITER ;
+
+output- CALL FindLcm(542,20,120);
+	+------------------------------------+
+	|                                    |
+	+------------------------------------+
+	| LCM of 542 , 20 and 120 is = 32520 |
+	+------------------------------------+
+
+6)
+DELIMITER //
+CREATE PROCEDURE IsPerfect(IN num INT)
+BEGIN
+	DECLARE divisor INT DEFAULT 2;
+    	DECLARE sum INT DEFAULT 1;
+    	WHILE divisor*divisor<=num DO
+		IF MOD(num,divisor)=0 THEN
+			SET sum=sum+divisor;
+            		IF divisor != num DIV divisor THEN
+				SET sum=sum+num DIV divisor;
+			END IF;
+        	END IF;
+	        SET divisor=divisor+1;
+    	END WHILE;
+    	IF num=sum THEN
+		SELECT CONCAT(num," Is a perfect number.") AS "";
+	ELSE SELECT CONCAT(num," Is not a perfect number.") AS "";
+    END IF;
+END //
+DELIMITER ;
+
+output- CALL IsPerfect(8128);
+	+---------------------------+
+	|                           |
+	+---------------------------+
+	| 8128 Is a perfect number. |
+	+---------------------------+
+
+7)
+DELIMITER //
+CREATE PROCEDURE CntVowCon(IN word VARCHAR(256))
+BEGIN
+	DECLARE idx INT DEFAULT 1;
+    	DECLARE vowels INT DEFAULT 0;
+    	DECLARE conso INT DEFAULT 0;
+    	WHILE idx<=CHAR_LENGTH(word) DO
+		IF SUBSTRING(word,idx,1) IN ('A','E','I','O','U') THEN
+			SET vowels=vowels+1;
+		ELSE SET conso=conso+1;
+        END IF;
+        SET idx=idx+1;
+    	END WHILE;
+    	SELECT vowels AS "Number of vowels";
+    	SELECT conso AS "Number of consonants";
+END //
+DELIMITER ;
+
+output- CALL CntVowCon('ayushagrawal');
+	+------------------+
+	| Number of vowels |
+	+------------------+
+	|                5 |
+	+------------------+
+
+	+----------------------+
+	| Number of consonants |
+	+----------------------+
+	|                    7 |
+	+----------------------+	
+
+8)
+DELIMITER //
+CREATE PROCEDURE UpdateAmount(IN accountNo VARCHAR(10))
+BEGIN
+	IF (SELECT Act_no FROM deposit WHERE Act_no=accountNo) IS NULL THEN
+		SELECT "account not present " AS "";
+    	ELSE
+		UPDATE deposit SET amount=amount+2000 WHERE Act_no=accountNo AND amount<5000;
+        	SELECT "account updated" AS ""; 
+    	END IF;
+END //
+DELIMITER ;
+
+output- CALL UpdateAmount('A1583');
+	+----------------------+
+	|                      |
+	+----------------------+
+	| account not present  |
+	+----------------------+
+
+9)
+CREATE TABLE employee(
+	emp_no VARCHAR(10) PRIMARY KEY,
+    	emp_name VARCHAR(50) 
+);
+
+INSERT INTO employee VALUES
+	('A867G','RAM'),
+    	('TH323','SUNIL'),
+    	('J4845','JOHN'),
+    	('K4583','ANIL'),
+    	('I8729','SARTAJ');
+
+A)
+DELIMITER //
+CREATE PROCEDURE FindEmployee(IN employeeCode VARCHAR(10))
+BEGIN
+	DECLARE name VARCHAR(10);
+    	SELECT emp_name INTO name FROM employee WHERE emp_code=employeeCode;
+	IF name IS NULL THEN
+		SELECT "employee not present" AS "";
+	ELSE SELECT CONCAT("name of the employee with the code ",employeeCode," is: ",name) AS " ";
+	END IF;
+END //
+DELIMITER ;
+
+output- CALL FindEmployee('TH373');
+	+-----------------------------------------------------+
+	|                                                     |
+	+-----------------------------------------------------+
+	| name of the employee with the code TH373 is: RAJESH |
+	+-----------------------------------------------------+
+
+B)
+DELIMITER //
+CREATE PROCEDURE AddEmployee(IN employeeCode VARCHAR(10),IN employeeName VARCHAR(10))
+BEGIN
+	DECLARE name VARCHAR(10);
+    	SELECT emp_name INTO name FROM employee WHERE emp_code=employeeCode;
+	IF name IS NULL THEN
+		INSERT INTO employee VALUES(employeeCode,employeeName);
+		SELECT "employee added " AS "";
+	ELSE SELECT "employee already present" AS "";
+	END IF;
+END //
+DELIMITER ;
+
+output- CALL AddEmployee('KJ345','SURESH');
+	+----------------+
+	|                |
+	+----------------+
+	| employee added |
+	+----------------+
+
+row added- | KJ345    | SURESH   |
+
+10)
+DELIMITER //
+CREATE PROCEDURE DeleteBranch(IN branchName VARCHAR(10))
+BEGIN
+	DECLARE num INT DEFAULT 0;
+   	SELECT COUNT(*) INTO num FROM borrow WHERE B_name=branchName;
+    	DELETE FROM borrow WHERE B_name=branchName;
+    	SELECT num AS "Number of rows deleted ";
+END //
+DELIMITER ;
+
+output- CALL DeleteBranch('PQR');
+	+-------------------------+
+	| Number of rows deleted  |
+	+-------------------------+
+	|                       3 |
+	+-------------------------+
+
+deleted rows are - 
+	| L1489   | AMAR   | PQR    |  40080.50 |
+	| L3626   | SARTAJ | PQR    |  86733.95 |
+	| L6387   | IMRAN  | PQR    | 316786.00 |

@@ -1,0 +1,107 @@
+1)
+CREATE TABLE emp(
+	eno VARCHAR(10) PRIMARY KEY,
+	sal INTEGER,
+	dno INTEGER
+);
+
+INSERT INTO emp VALUES
+	('AG867',123315,01),
+    	('TH323',23425,23),
+    	('J4845',36241,05),
+    	('K4583',316359,13),
+        ('ZL238',9231,45),
+        ('OB912',10000,15),
+    	('I8729',4350,28),
+	('AG967',123315,01);
+
+DELIMITER //
+CREATE PROCEDURE FindSalary(IN departmentNo INTEGER)
+BEGIN 
+	DECLARE emp_sal INTEGER;
+    	DECLARE TOO_MANY_ROWS CONDITION FOR 1172;
+    	DECLARE EXIT HANDLER FOR NOT FOUND 
+		SELECT "Department Number not present in the database!!" AS " ";
+    	DECLARE EXIT HANDLER FOR TOO_MANY_ROWS 
+		SELECT "Multiple rows with the same department number!!" AS " ";  
+    	SELECT sal INTO emp_sal FROM emp WHERE dno=departmentNo;
+    	SELECT CONCAT("Salary of the employee with the department number = ",departmentNo," is = ",emp_sal) AS " ";
+END //
+DELIMITER ;
+
+output - CALL FindSalary(01);
+	 +-------------------------------------------------+
+	 |                                                 |
+	 +-------------------------------------------------+
+	 | Multiple rows with the same department number!! |
+	 +-------------------------------------------------+
+		 
+	 CALL FindSalary(00);
+	 +-------------------------------------------------+
+	 |                                                 |
+	 +-------------------------------------------------+
+	 | Department Number not present in the database!! |
+	 +-------------------------------------------------+
+
+	 CALL FindSalary(23);
+	 +-------------------------------------------------------------------+
+	 |                                                                   |
+	 +-------------------------------------------------------------------+
+	 | Salary of the employee with the department number = 23 is = 23425 |
+	 +-------------------------------------------------------------------+	
+
+
+2)
+CREATE TABLE product(
+	pno VARCHAR(10) PRIMARY KEY,
+    pname VARCHAR(20),
+	actual_price INTEGER,
+	sale_price INTEGER
+);
+
+INSERT INTO product VALUES
+	('AG','X',123,123),
+    	('TH','Y',23,234),
+    	('J4','Z',5,362),
+    	('K4','W',13,316),
+        ('ZL','P',45,92),
+        ('OB','Q',15,100),
+    	('I8','R',28,43);
+
+DELIMITER //
+CREATE PROCEDURE FindProfit(IN productNo VARCHAR(10))
+BEGIN 
+	DECLARE profit INTEGER;
+    	DECLARE zero_profit CONDITION FOR SQLSTATE '45000';
+    	DECLARE EXIT HANDLER FOR NOT FOUND 
+		SELECT "Product Number not present in the database!!" AS " ";  
+	DECLARE EXIT HANDLER FOR zero_profit
+		SELECT "No Profit!!" AS " ";
+    	SELECT (sale_price-actual_price) INTO profit FROM product WHERE pno=productNo;
+    	IF profit=0 THEN
+		SIGNAL SQLSTATE '45000'; 
+    	END IF;
+    	SELECT CONCAT("Profit of the product with the product-number = ",productNo," is = ",profit) AS " ";
+END //
+DELIMITER ;
+
+output - CALL FindProfit('ZL');
+	 +------------------------------------------------------------+
+	 |                                                            |
+	 +------------------------------------------------------------+
+	 | Profit of the product with the product-number = ZL is = 47 |
+	 +------------------------------------------------------------+
+
+	 CALL FindProfit('AG');
+	 +-------------+
+	 |             |
+	 +-------------+
+	 | No Profit!! |
+ 	 +-------------+
+
+	CALL FindProfit('LG');
+	+----------------------------------------------+
+	|                                              |
+	+----------------------------------------------+
+	| Product Number not present in the database!! |
+	+----------------------------------------------+

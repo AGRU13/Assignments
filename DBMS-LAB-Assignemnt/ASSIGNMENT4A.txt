@@ -1,0 +1,234 @@
+CREATE TABLE employee(
+	emp_no VARCHAR(10) PRIMARY KEY,
+	name VARCHAR(50),
+	salary INTEGER,
+    	city VARCHAR(20)
+);
+
+INSERT INTO employee VALUES
+	('AG867','RAM',123315,'MUMBAI'),
+    	('TH323','SUNIL',23425,'DELHI'),
+    	('J4845','JOHN',36241,'KOLKATA'),
+    	('K4583','ANIL',316359,'DELHI'),
+        ('ZL238','MOBAK',9231,'KOLKATA'),
+        ('OB912','RAJESH',10000,'MUMBAI'),
+    	('I8729','SARTAJ',4350,'INDORE');
+
+1)
+DELIMITER //
+CREATE PROCEDURE Delete2Rows()
+BEGIN
+	DECLARE finished INTEGER DEFAULT 2;
+    	DECLARE emp_code VARCHAR(10);
+    	DECLARE curEmployee CURSOR FOR SELECT emp_no FROM employee ORDER BY salary DESC;
+    	OPEN curEmployee;
+    	WHILE finished>0 DO
+		FETCH curEmployee into emp_code;
+        	DELETE FROM employee WHERE emp_no=emp_code;
+		SET finished=finished-1;
+	END WHILE;
+    	CLOSE curEmployee;
+	SELECT "Rows Deleted!!" AS "";
+END //
+DELIMITER ;
+
+output - CALL Delete2Rows();
+	+----------------+
+	|                |
+	+----------------+	
+	| Rows Deleted!! |
+	+----------------+
+
+	Rows deleted are :- 
+	| AG867  | RAM    | 123315 | MUMBAI  |
+	| K4583  | ANIL   | 316359 | DELHI   |	
+	
+2)
+DELIMITER //
+CREATE PROCEDURE RaiseSalary()
+BEGIN
+	DECLARE finished INTEGER DEFAULT 1;
+    	DECLARE count INTEGER DEFAULT 0;
+    	DECLARE emp_code VARCHAR(10);
+    	DECLARE curEmployee CURSOR FOR SELECT emp_no FROM employee WHERE city='KOLKATA';
+    	DECLARE CONTINUE HANDLER FOR NOT FOUND SET finished=0;
+   	OPEN curEmployee;
+    	getEmployee: LOOP
+		FETCH curEmployee into emp_code;
+        	IF finished=0 THEN
+			LEAVE getEmployee;
+        	END IF;
+        	UPDATE employee SET salary=salary+salary*0.15 WHERE emp_no=emp_code;
+        	SET count=count+1;
+	END LOOP;
+    	CLOSE curEmployee;
+	SELECT CONCAT("Number of rows updated = ",count) AS "";
+END //
+DELIMITER ;
+
+output- CALL RaiseSalary();
+	+----------------------------+
+	|                            |
+	+----------------------------+	
+	| Number of rows updated = 2 |
+	+----------------------------+
+
+	initial- 					final-
+	| J4845  | JOHN   |  36241 | KOLKATA |		| J4845  | JOHN   |  41677 | KOLKATA |
+	| ZL238  | MOBAK  |   9231 | KOLKATA |		| ZL238  | MOBAK  |  10616 | KOLKATA |
+
+3)
+CREATE TABLE deposit(
+    	Act_no VARCHAR(10) PRIMARY KEY,
+    	C_name VARCHAR(10),
+    	B_name VARCHAR(10),
+    	amount DECIMAL(8,2) NOT NULL,
+        age DECIMAL(3,0) NOT NULL
+);
+
+INSERT INTO Deposit VALUES
+    	('J4845', 'SUNIL','XYZ',81124.41,63),
+    	('M4745', 'MOBAK','PQR',41854.41,65),
+    	('K4563', 'ADA','XYZ',12312.44,67),
+    	('K4583', 'RAM','ABC',14512.44,69),
+    	('K2643', 'FAISAL','PQR',64512.44,72),
+    	('D2543', 'AMAR','PQR',24512.44,45),
+    	('D8943', 'SARTAJ','XYZ',15632.66,30),
+    	('I8729', 'IMRAN','PQR',68713.78,54),
+	('A4583', 'ANIL','ABC',512.44,49);
+    
+a)
+DELIMITER //
+CREATE PROCEDURE Transfer(IN account_no1 VARCHAR(10),IN account_no2 VARCHAR(10))
+BEGIN 
+	DECLARE balance DECIMAL(8,2);
+    	SELECT amount INTO balance FROM deposit WHERE Act_no=account_no1;
+    	SELECT CONCAT('Transferring amount of 2000 from ',account_no1,' to ',account_no2) AS "";
+    	IF balance<2000 THEN
+		SELECT CONCAT('Insufficient funds in the account ',account_no1) AS "";
+	ELSE 
+		UPDATE deposit SET amount=amount-2000 WHERE Act_no=account_no1;
+        	UPDATE deposit SET amount=amount+2000 WHERE Act_no=account_no2;
+        	SELECT 'amount transferred!!' AS "";
+    	END IF;
+END //
+DELIMITER ;
+
+output - CALL Transfer('A4583','D2543');
+	+-------------------------------------------------+
+	|                                                 |
+	+-------------------------------------------------+
+	| Transferring amount of 2000 from A4583 to D2543 |
+	+-------------------------------------------------+
+
+	+-----------------------------------------+
+	|                                         |
+	+-----------------------------------------+
+	| Insufficient funds in the account A4583 |
+	+-----------------------------------------+
+
+	CALL Transfer('D2543','A4583');
+	+-------------------------------------------------+
+	|                                                 |
+	+-------------------------------------------------+
+	| Transferring amount of 2000 from D2543 to A4583 |
+	+-------------------------------------------------+
+	
+	+----------------------+
+	|                      |
+	+----------------------+
+	| amount transferred!! |
+	+----------------------+
+	
+	initial - 				final-
+	|A4583 |ANIL |ABC |512.44   |49 |	|A4583 |ANIL |ABC |2512.44  |49 |
+	|D2543 |AMAR |PQR |24512.44 |45 |	|D2543 |AMAR |PQR |22512.44 |45 |
+
+b)
+DELIMITER //
+CREATE PROCEDURE RaiseAmount()
+BEGIN 
+	DECLARE account_no VARCHAR(10);
+	DECLARE finished INTEGER DEFAULT 1;
+    	DECLARE count INTEGER DEFAULT 1;
+	DECLARE currCustomer CURSOR FOR SELECT Act_no FROM deposit WHERE age>60;
+    	DECLARE CONTINUE HANDLER FOR NOT FOUND SET finished=0;
+    	OPEN currCustomer;
+    	getCustomer: LOOP
+		FETCH currCustomer INTO account_no;
+		IF count>3 OR finished=0 THEN
+			LEAVE getCustomer;
+		END IF;
+        	UPDATE deposit SET amount=amount+0.15*amount WHERE Act_no=account_no;
+		SET count=count+1;
+   	END LOOP;
+    	SELECT "database updated" AS "";
+END //
+DELIMITER ;
+
+output - CALL RaiseAmount();
+	+------------------+
+	|                  |
+	+------------------+
+	| database updated |
+	+------------------+
+
+	initial-				 final-
+	|J4845 |SUNIL  |XYZ |81124.41 |63 | 	 |J4845 |SUNIL |XYZ |93293.07 |63 |	
+	|K2643 |FAISAL |PQR |64512.44 |72 |	 |K2643 |FAISAL|PQR |74189.31 |72 |
+	|K4563 |ADA    |XYZ |12312.44 |67 |	 |K4563 |ADA   |XYZ |14159.31 |67 |	
+
+4)
+DELIMITER //
+CREATE PROCEDURE UpdateSalary()
+BEGIN 
+	DECLARE emp_code VARCHAR(10);
+	DECLARE finished INTEGER DEFAULT 1;
+	DECLARE currCustomer CURSOR FOR SELECT emp_no FROM employee;
+	DECLARE CONTINUE HANDLER FOR NOT FOUND SET finished=0;
+    	START TRANSACTION;
+    	SAVEPOINT initialSalaries;
+    	OPEN currCustomer;
+    	getCustomer: LOOP
+		FETCH currCustomer INTO emp_code;
+		IF finished=0 THEN
+			LEAVE getCustomer;
+		END IF;
+        	UPDATE employee SET salary=salary+2000 WHERE emp_no=emp_code;
+    	END LOOP;
+    	IF (SELECT SUM(salary) FROM employee)>20000 THEN
+		SELECT "Updation not possible, rolling back changes" AS "";
+        	ROLLBACK TO SAVEPOINT initialSalaries;
+	ELSE SELECT "database updated" AS "";
+	END IF;
+END //
+DELIMITER ;
+
+output- CALL UpdateSalary();
+	+------------------+
+	|                  |
+	+------------------+
+	| database updated |
+	+------------------+
+	
+	initial- 						final-
+	+--------+--------+--------+---------+			+--------+--------+--------+---------+
+	| emp_no | name   | salary | city    |			| emp_no | name   | salary | city    |
+	+--------+--------+--------+---------+			+--------+--------+--------+---------+
+	| AG867  | RAM    |    315 | MUMBAI  |			| AG867  | RAM    |   2315 | MUMBAI  |
+	| I8729  | SARTAJ |   2350 | INDORE  |			| I8729  | SARTAJ |   4350 | INDORE  |
+	| J4845  | JOHN   |    241 | KOLKATA |			| J4845  | JOHN   |   2241 | KOLKATA |
+	| K4583  | ANIL   |    359 | DELHI   |			| K4583  | ANIL   |   2359 | DELHI   |
+	| OB912  | RAJESH |   1000 | MUMBAI  |			| OB912  | RAJESH |   3000 | MUMBAI  |
+	| TH323  | SUNIL  |    425 | DELHI   |			| TH323  | SUNIL  |   2425 | DELHI   |	
+	| ZL238  | MOBAK  |    231 | KOLKATA |			| ZL238  | MOBAK  |   2231 | KOLKATA |
+	+--------+--------+--------+---------+			+--------+--------+--------+---------+
+	
+again calling-	CALL UpdateSalary();
+	+---------------------------------------------+
+	|                                             |
+	+---------------------------------------------+
+	| Updation not possible, rolling back changes |
+	+---------------------------------------------+
+	
+	no changes made in the table in this case.

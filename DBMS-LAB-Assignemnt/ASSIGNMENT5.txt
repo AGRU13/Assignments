@@ -1,0 +1,219 @@
+1)
+CREATE TABLE Department(
+	dno DECIMAL(3) PRIMARY KEY,
+    	dname VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE Emp(
+	eno VARCHAR(10) PRIMARY KEY,
+    	ename VARCHAR(20) ,
+	sal INTEGER,
+	dno DECIMAL(3),
+    	FOREIGN KEY (dno)
+		REFERENCES Department(dno)
+		ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE bonus_info(
+	eno VARCHAR(10) PRIMARY KEY,
+    	bonus INTEGER,
+    	new_sal INTEGER
+);
+
+INSERT INTO Department VALUES
+	(4,'XX'),
+    	(10,'YY'),
+    	(16,'ZZ');
+
+INSERT INTO Emp VALUES
+	('2GD53','Alicia',25000,16),
+    	('4ZA78','Jennifer',43000,10),
+    	('9LK21','Joyce',25000,4),
+    	('6UH13','Ricardo',66000,4);
+
+DELIMITER //
+CREATE PROCEDURE ComputeBonus()
+BEGIN 
+	DECLARE finished INTEGER DEFAULT 1;
+    	DECLARE currEno VARCHAR(10);
+    	DECLARE currSal INTEGER;
+    	DECLARE currdepName VARCHAR(20);
+    	DECLARE bonus INTEGER;
+	DECLARE currEmp CURSOR FOR SELECT eno,sal,dname FROM Emp INNER JOIN Department USING (dno);
+    	DECLARE CONTINUE HANDLER FOR NOT FOUND SET finished=0;
+    	OPEN currEmp;
+    	getEmployee: LOOP
+		FETCH currEmp INTO currEno,currSal,currdepName;
+        	IF finished=0 THEN
+			LEAVE getEmployee;
+		END IF;
+        	IF currdepName='XX' THEN
+			SET bonus=LEAST(4000,0.25*currSal);
+		ELSEIF currdepNAME='YY' THEN
+			SET bonus=LEAST(3000,0.15*currSal);
+		ELSE  SET bonus=LEAST(5000,0.1*currSal);
+        END IF;
+        INSERT INTO bonus_info VALUES(currEno,bonus,currSal+bonus);
+    	END LOOP;
+    	SELECT "UPDATION COMPLETED." AS "";
+END //
+DELIMITER ;
+
+output - CALL ComputeBonus();
+	+-------+-------+---------+
+	| eno   | bonus | new_sal |
+	+-------+-------+---------+
+	| 2GD53 |  2500 |   27500 |
+	| 4ZA78 |  3000 |   46000 |
+	| 6UH13 |  4000 |   70000 |
+	| 9LK21 |  4000 |   29000 |
+	+-------+-------+---------+
+
+
+2)
+CREATE TABLE salesman(
+	sno VARCHAR(10) PRIMARY KEY,
+    	sname VARCHAR(20),
+    	city VARCHAR(20),//city
+    	balance INT
+);
+
+CREATE TABLE information(
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	sno VARCHAR(10),
+    	balance INT,
+    	operation VARCHAR(10)
+);    
+
+INSERT INTO salesman VALUES
+	('4KJ34','Franklin','Houston',30000),
+    	('8NR95','Jennifer','Bellaire',25000),
+    	('9IR12','Ramesh','Texas',55000),
+    	('9ZM19','Narayan','Houston',45900);
+
+CREATE TRIGGER store_salesman_record_update
+	BEFORE UPDATE ON salesman
+    	FOR EACH ROW
+    	INSERT INTO infortmation(sno,balance,operation) VALUES(OLD.sno,OLD.balance,'update');
+    
+CREATE TRIGGER store_salesman_record_delete
+	BEFORE DELETE ON salesman
+    	FOR EACH ROW
+    	INSERT INTO information(sno,balance,operation) VALUES(OLD.sno,OLD.balance,'delete');
+
+output - UPDATE salesman SET city='Washington' WHERE city='Houston';
+	 DELETE FROM salesman WHERE city='Bellaire';
+	
+	+-------+---------+-----------+
+	| sno   | balance | operation |
+	+-------+---------+-----------+
+	| 4KJ34 |   30000 | update    |
+	| 9ZM19 |   45900 | update    |
+	| 8NR95 |   25000 | delete    |
+	+-------+---------+-----------+
+
+3)
+CREATE TABLE customer(
+	cno VARCHAR(10) PRIMARY KEY,
+    	cname VARCHAR(20),
+    	city VARCHAR(20),
+    	balance INT
+);
+
+CREATE TABLE loan(
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	loanno VARCHAR(10),
+    	amount INT
+);    
+
+INSERT INTO customer VALUES
+	('4KJ34','Franklin','Houston',324),
+    	('8NR95','Jennifer','Bellaire',1003),
+    	('9IR12','Ramesh','Texas',31093),
+    	('9ZM19','Narayan','Houston',45900),
+    	('4LF53','Wallace','Houston',634);
+
+
+DELIMITER //
+CREATE TRIGGER check_balance
+	BEFORE UPDATE ON customer
+    	FOR EACH ROW
+BEGIN
+    	IF NEW.balance<0 THEN
+		INSERT INTO loan(loanno,amount) VALUES(NEW.cno,-1*NEW.balance);
+        	SET NEW.balance=0;
+    	END IF;
+END//
+DELIMITER ;
+
+output- UPDATE customer SET balance=balance-1000 WHERE city='Houston';
+	customer table-
+	+-------+----------+----------+---------+
+	| cno   | cname    | city     | balance |
+	+-------+----------+----------+---------+
+	| 4KJ34 | Franklin | Houston  |       0 |	
+	| 4LF53 | Wallace  | Houston  |       0 |
+	| 8NR95 | Jennifer | Bellaire |    1003 |
+	| 9IR12 | Ramesh   | Texas    |   31093 |
+	| 9ZM19 | Narayan  | Houston  |   44900 |
+	+-------+----------+----------+---------+
+
+	loan table-
+	+----+--------+--------+
+	| id | loanno | amount |
+	+----+--------+--------+
+	|  2 | 4KJ34  |    676 |
+	|  3 | 4LF53  |    366 |
+	+----+--------+--------+
+
+
+4)
+CREATE TABLE Employee(
+	eno VARCHAR(10) PRIMARY KEY,
+   	ename VARCHAR(20),
+    	salary INT
+);
+
+CREATE TABLE Dept(
+	dnum DECIMAL(3) PRIMARY KEY,
+	mangno VARCHAR(10),
+    	budget INT,
+    	FOREIGN KEY (mangno)
+		REFERENCES Employee(eno)
+        	ON UPDATE SET NULL ON DELETE SET NULL
+);    
+
+CREATE TABLE Works(
+	eno VARCHAR(10) PRIMARY KEY,
+    	dnum DECIMAL(3),
+    	FOREIGN KEY(eno)
+		REFERENCES Employee(eno)
+       		ON DELETE CASCADE ON UPDATE CASCADE,
+	FOREIGN KEY(dnum)
+		REFERENCES Dept(dnum)
+        	ON DELETE SET NULL ON UPDATE CASCADE 
+);
+
+DELIMITER //
+CREATE TRIGGER update_salary
+	BEFORE UPDATE ON Employee
+    	FOR EACH ROW
+BEGIN
+	DECLARE dept_num DECIMAL(3);
+    	DECLARE mngr_num VARCHAR(10);
+    	SELECT Works.dnum INTO dept_num FROM Works WHERE Works.eno=OLD.eno;
+    	SELECT Dept.mangno INTO mngr_num FROM Dept WHERE Dept.dnum=dept_num;
+    
+    	IF NEW.salary>OLD.salary THEN
+		IF (SELECT SUM(salary) FROM Employee,Works WHERE Works.eno=Employee.eno AND Works.dnum=dept_num)+3*(NEW.salary-OLD.salary) <= (SELECT budget FROM Dept WHERE Dept.dnum=dept_num) THEN
+			UPDATE Employee AS E SET E.salary=E.salary+2*(New.salary-OLD.salary) WHERE E.eno=mngr_num;
+        ELSE 
+		SET NEW.salary=OLD.salary;
+            	SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT= "Salary not updated as it exceeds the budget of the department";
+        END IF;
+    END IF;
+END//
+DELIMITER ;
+
+
+  

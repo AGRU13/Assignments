@@ -1,0 +1,261 @@
+CREATE DATABASE dbms_it;
+
+CREATE TABLE cust (
+	Cust_id VARCHAR(3),
+     	Lname VARCHAR(15),
+    	Fname VARCHAR(15),
+    	Area VARCHAR(2),
+    	Phone_no INT
+);
+
+CREATE TABLE movie (
+    	Mv_no TINYINT,
+    	Title VARCHAR(25),
+    	Type VARCHAR(10),
+    	Star VARCHAR(25),
+    	Price FLOAT
+);
+
+CREATE TABLE invoice (
+    	Inv_no VARCHAR(3),
+    	Mv_no TINYINT,
+    	Cust_id VARCHAR(3),
+    	Issue_date date,
+    	Return_date date
+);
+
+INSERT INTO cust (Cust_id,Fname,Lname,Area,Phone_no)
+    	VALUES ('S12','Smith','Mary','GH',61722355),
+    	('H35','Tammy','Sanders','KL',94752637),
+    	('K56','Foster','Phyllis','F1',37257915),
+    	('T92','Ethel','Webb','TY',32197401);
+ 	('B56','Ivan','Stevens','F4',98713123),
+    	('N91','Tammy','Murray','KA',31153267),
+    	('W11','Marjorie','Tucker','NX',48276538),
+    	('Z91','April','Burns','MA',98324734);
+
+INSERT INTO cust (Cust_id,Fname,Lname,area)
+	VALUES ('M43','Michael','Sanders','ZA'),
+    	('ID1','Didi','Dodat','LA'),
+INSERT INTO cust (Cust_id,Fname,area,Phone_no)
+	VALUES ('KAL','Zeno','T1',72452882),
+	('IWE','Amneus','N7',34235928);
+
+INSERT INTO movie(Mv_no,Title,Type,Star,Price)
+    	VALUES (12,'Ace Ventura','Comedy','Jim Carrey',209.90),
+    	(8,'Uncut Gems','Drama','Adam Sandler',304.50),
+    	(45,'Seven','Mystery','Brad Pitt',140.00),
+    	(4,'Gone Girl','Thriller','Ben Affleck',173.40),
+    	(22,'Easy-A','Comedy','Emma Stone',100.00);
+	(1,'Ready Player One','Sci-fi','Tye Sheridan',179.90),
+    	(26,'Batman v Superman','Action','Ben Affleck',186.70),
+    	(38,'Inception','Sci-fi','Leonardo DiCaprio',150),
+    	(17,'Lord of the Rings','Fantasy','Elijah Wood',250);
+
+INSERT INTO movie(Mv_no,title,type,star,price)
+	VALUES (13,'Basic Instinct','Horror','Michael Douglas',160.34),
+    	(33,'Home Alone','Comedy','Joe Pesci',230.34);
+
+INSERT INTO invoice (Inv_no,Mv_no,Cust_id,Issue_date,Return_date)
+    	 VALUES ('JHY',22,'S12','2012-06-23','2012-07-19'),
+    	('WB3',26,'ID1','2017-09-04','2017-10-25'),
+    	('ER1',1,'IWE','2018-09-29','2018-11-05'),
+    	('NBA',45,'N91','2020-02-28','2020-03-5'),
+    	('K56',13,'H35','2013-09-17','2013-09-29'),
+    	('MNP',8,'T92','2014-09-07','2014-09-30'),
+    	('POT',4,'B56','2016-12-31','2017-12-17'),
+    	('ERG',17,'W11','2015-11-15','2016-02-07'),
+    	('ZXC',38,'Z91','2019-03-22','2019-03-29'),
+    	('ASD',12,'M43','2016-05-4','2016-06-04'),
+    	('BGR',17,'K56','2012-11-29','2012-12-29');
+
+1.  SELECT Fname,Lname 
+    FROM cust;
+
+2.  SELECT DISTINCT type 
+    FROM movie;
+
+3.  SELECT 
+    *FROM cust 
+    WHERE Phone_no>5550000;
+
+4.  SELECT 
+    *FROM movie 
+    WHERE type='Action' OR type='Comedy';
+
+5.  SELECT 
+    *FROM movie 
+    WHERE Price>150 AND Price<=200;
+
+6.  SELECT Fname 
+    FROM cust 
+    WHERE Fname LIKE '_a%';
+
+7.  SELECT Lname 
+    FROM cust 
+    WHERE Lname LIKE 'S%' OR Lname LIKE 'J%';
+
+8.  SELECT 
+    *FROM cust 
+    WHERE area LIKE '%a';
+
+9.  SELECT 
+    *FROM cust 
+    WHERE area='da' OR area='mu' OR area='gh';
+
+10. SELECT MV_no,title,type 
+    FROM movie 
+    WHERE star LIKE 'm%';
+
+11. SELECT title,price,5*price  new_price 
+    FROM movie 
+    WHERE price>150;
+
+12. SELECT 
+    *FROM movie 
+    ORDER BY title;
+
+13. SELECT title,type 
+    FROM movie 
+    WHERE type!='horror';
+
+14. UPDATE movie
+    SET price=price/(price-100)
+    WHERE title='home alone';
+
+15. SELECT Fname,Lname,area,cust_id 
+    FROM cust 
+    WHERE Phone_no IS NULL;
+
+16. SELECT Fname 
+    FROM cust 
+    WHERE Lname IS NULL;
+
+17. SELECT 
+    *FROM invoice 
+    WHERE monthname(issue_date)='September';
+
+18. SELECT COUNT(*) total_customers 
+    FROM cust;
+
+19. SELECT SUM(price) total_price 
+    FROM movie;
+
+20. SELECT AVG(price) average_price 
+    FROM movie;
+
+21. SELECT MAX(price) maximum_price, MIN(price) minimum_price 
+    FROM movie;
+
+22. SELECT COUNT(price) price_greater_than_150 
+    FROM movie WHERE price>=150;
+
+23. SELECT CONCAT('The Invoice no. of Customer Id ',cust_id,' is ',inv_no,' and Movie no. is ',mv_no) AS output 
+    FROM invoice;
+
+24. SELECT type,AVG(price) 
+    FROM movie 
+    GROUP BY type;
+
+25. SELECT type,COUNT(*) 
+    FROM movie 
+    GROUP BY type;
+ 
+26. SELECT type,COUNT(*) count 
+    FROM movie 
+    WHERE type="Thriller" OR type="Comedy" 
+    GROUP BY type;
+
+27. SELECT type,AVG(price),MAX(price) AS max 
+    FROM movie 
+    GROUP BY type 
+    HAVING max=150;
+
+28. SELECT AVG(price) 
+    FROM movie 
+    WHERE (type="comedy" OR type="thriller") AND price>=150;
+
+29. SELECT Mv_no 
+    FROM cust INNER JOIN invoice 
+    USING (cust_id) 
+    WHERE fname="Ivan";
+
+30. SELECT Fname,Lname,mv_no 
+    FROM cust INNER JOIN invoice USING(cust_id);
+
+31. SELECT title,cust_id,mv_no 
+    FROM movie INNER JOIN invoice USING(mv_no);
+
+32. SELECT title,type 
+    FROM cust INNER JOIN invoice USING(cust_id) INNER JOIN movie USING(mv_no)
+    WHERE fname="Vandana";
+
+33. SELECT fname,lname 
+    FROM movie INNER JOIN invoice USING(mv_no) INNER JOIN cust USING(cust_id) 
+    WHERE type="drama";
+
+34. SELECT CONCAT("The movie taken by ",fname," ",lname," is ",title) AS result
+    FROM movie
+    	INNER JOIN invoice USING(mv_no)
+    	INNER JOIN cust USING(cust_id)
+    WHERE mv_no>=3;
+
+35. SELECT *FROM cust 
+    WHERE cust_id IN(SELECT cust_id 
+    FROM invoice WHERE mv_no=9);
+
+36. SELECT fname,lname,area FROM cust 
+    WHERE cust_id=(SELECT cust_id 
+    FROM invoice WHERE inv_no="i10");
+
+37. SELECT title 
+    FROM movie 
+    WHERE mv_no IN(SELECT mv_no FROM invoice WHERE cust_id IN(SELECT cust_id FROM cust WHERE fname="Ivan" OR fname="Vandana"));
+
+38. SELECT type,mv_no 
+    FROM movie 
+    WHERE mv_no IN(SELECT mv_no FROM invoice WHERE cust_id="n91" OR cust_id="H35");
+
+39. SELECT cust_id 
+    FROM invoice 
+    WHERE mv_no IN(SELECT mv_no FROM movie WHERE star="tom cruise");
+
+40. SELECT fname,lname,Phone_no 
+    FROM cust 
+    WHERE cust_id IN (SELECT cust_id FROM invoice WHERE MONTH(issue_date)<8);
+
+41. SELECT mv_no,title 
+    FROM movie 
+    WHERE mv_no IN (SELECT DISTINCT mv_no FROM invoice);
+
+42. SELECT inv_no, DAYNAME(issue_date) AS Issued_Day 
+    FROM invoice;
+
+43. SELECT inv_no,MONTHNAME(return_date) AS Return_Day 
+    FROM invoice;
+
+44. SELECT DATE_FORMAT(issue_date,"%d-%M-%y") AS issue_date 
+    FROM invoice;
+
+45. SELECT DATE_ADD(CURDATE(),INTERVAL 15 DAY) result;
+
+46. SELECT DATEDIFF(CURDATE(),return_date) AS Days_elapsed 
+    FROM invoice;
+
+47. UPDATE cust 
+    SET Phone_no=466389 
+    WHERE Fname="Pramada";
+
+48. UPDATE invoice 
+    SET Issue_date='1993-07-24' 
+    WHERE cust_id='a01';
+
+49. DELETE FROM invoice 
+    WHERE Inv_no='i08';
+
+50. DELETE FROM invoice 
+    WHERE Return_date<'1993-07-10';
+
+51. UPDATE invoice 
+    SET Return_date='1993-08-16' 
+    WHERE inv_no='i08';

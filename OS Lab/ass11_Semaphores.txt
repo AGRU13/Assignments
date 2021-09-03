@@ -1,0 +1,2 @@
+There can be multiple readers and writers. 
+A reader or a writer reads/writes and sleeps for a random period of time.

@@ -1,0 +1,4 @@
+How to create a process in UNIX? [using the system call fork()]. 
+Prove that the address space for the child is copied from the parent. [Think of a variable which is defined in the parent and then the child is forked, see if in the child the same value of the variable is reflected]. 
+Show that in the child the return value of fork is zero whereas in the parent the return value is the pid (process id) of the child. 
+Check the maximum number of child processes you can create in the system from your login. [write a small code which will execute the fork call in a while loop probably].

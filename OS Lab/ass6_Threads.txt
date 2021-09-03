@@ -1,0 +1,16 @@
+Thread is a lightweight process. Threads shares the process context.
+
+Prove that the average time taken for the creation of threads is less than the average time taken for the creation of processes.
+
+Threads once created are equal. 
+Prove that you can create a thread within a thread. 
+Show that any thread can be killed by any other thread unless it is in detached state. 
+Show that if a thread is detached then no other thread can kill the detached thread. 
+Show how a particular thread can collect the return status of another thread when it (the latter) is terminated.
+
+Open a file inside the main thread. 
+Create two threads inside the main thread. 
+Show that the opened file is shared between the threads. 
+Also, show that a common variable declared inside the main is amenable to changes from within both the threads.
+
+Create a scenario where a master thread will create a set of slave threads and the master will wait until the slave threads are completed (use of pthread_join may be necessary).

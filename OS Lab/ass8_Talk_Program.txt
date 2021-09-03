@@ -1,0 +1,6 @@
+UNIX talk program:
+A wants to talk to B within a UNIX system. 
+Design and write a talk program such that process can communicate through two shared memories. 
+Suppose for A, the shared memory is SHM-A and for B SHM-B. 
+Whatever A wants to communicate to B, A writes on SHM-A and B reads from SHM-A. 
+Similarly, B writes on SHM-B and A reads from SHM-B.

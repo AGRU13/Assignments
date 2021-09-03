@@ -1,0 +1,3 @@
+Check what happens in the following scenario: Parent opens a file "t.txt" and then spawns a child. 
+Check whether the opened file is inherited by the child or not. 
+Write something on the open file from the child as well as from the parent and see the content of the file.

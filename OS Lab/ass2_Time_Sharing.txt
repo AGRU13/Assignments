@@ -1,0 +1,8 @@
+The CPU of your machine, single CPU is there, executes one instruction at a time.
+That is, it can execute one process at a time.
+So, the execution of the processes are not simultaneous (parallel) rather serial.
+The CPU is occupied by a process for a given period of time then it is occupied by
+Another process for the next slot ---> round robin
+
+Assignment is to show that the processes are running in a round robin way on the CPU
+And find out the slot time.

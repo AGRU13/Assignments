@@ -1,0 +1,9 @@
+Shared memory:
+
+How to create a shared memory? 
+Create a shared memory and write "Hello World!" in that shared memory. 
+Read from the shared memory and print it in the stdout.
+
+Create a shared memory from within a process A. 
+Create another process B, show how you can access the content of the shared memory. 
+How to delete the shared memory you have created inside a process?

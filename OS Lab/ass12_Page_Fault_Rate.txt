@@ -1,0 +1,1 @@
+Write a program which will demonstrate that the page fault rate depends on certain parameters like the size of the memory allocated and fashion in which the array is accessed like row-wise or column-wise with different hops.

@@ -1,0 +1,3 @@
+Demonstrate under what condition the system creates a ZOMBIE process.
+ [If the parent continues without caring for the return status of the child, then even if the child is completed, a trace of the child remains in the process table having the exit status as it has not been reaped.] 
+Show in at least three different ways how the creation of zombie can be prevented.
